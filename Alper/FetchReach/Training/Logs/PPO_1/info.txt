@@ -1,0 +1,4 @@
+environment_name = 'FetchReach-v2'
+total_timesteps = 100000
+Trained With -> PPO
+HyperParameters = verbose=1, tensorboard_log=log_path
