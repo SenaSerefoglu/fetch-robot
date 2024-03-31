@@ -1,15 +1,13 @@
 import os
-
-log_path = os.path.join('Training', 'Logs')
-training_log_path = os.path.join(log_path, 'TQC_1')
-
 from tensorboard import program
 
-tracking_address = training_log_path # the path of your log file.
+class Tensorboard:
+    def __init__(self, log_path):
+        self.log_path = log_path
 
-if __name__ == "__main__":
-    tb = program.TensorBoard()
-    tb.configure(argv=[None, '--logdir', tracking_address])
-    url = tb.launch()
-    print(f"Tensorflow listening on {url}")
-input("Press any key to")
+    def launch(self):
+        tb = program.TensorBoard()
+        tb.configure(argv=[None, '--logdir', self.log_path])
+        url = tb.launch()
+        print(f"Tensorflow listening on {url}")
+        return url
