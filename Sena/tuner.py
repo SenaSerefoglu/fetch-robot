@@ -19,7 +19,7 @@ class TimeLimitCallback(BaseCallback):
 
     def _on_step(self) -> bool:
         if self.start_time is not None and time.time() - self.start_time > self.time_limit:
-            print(f"Training stopped after {self.time_limit} seconds.")
+            print(f"Training stopped after {self.time_limit} seconds.\n")
             return False
         return True
     
@@ -50,37 +50,54 @@ class RewardTrackerCallback(BaseCallback):
 
 class ParameterDicts:
     def __init__(self) -> None:
-        self.PPO = {
-                'learning_rate': [3e-4, 1e-4, 5e-5],
-                'n_steps': [128, 256, 512],
-                'batch_size': [64, 128, 256],
-                'n_epochs': [4, 8, 16],
-                'gamma': [0.99, 0.95],
-                'gae_lambda': [0.95, 0.98],
-                'clip_range': [0.2, 0.1],
-                'clip_range_vf': [None, 0.2],
-                'normalize_advantage': [True, False],
-                'ent_coef': [0.01, 0.001],
-                'vf_coef': [0.5, 0.75],
-                'max_grad_norm': [0.5, 0.8],
-                'use_sde': [True, False],
-                'sde_sample_freq': [4, 8],
-                'target_kl': [0.05],
-                'policy_kwargs': [dict(net_arch=[512, 512, 256, 128])]
+        pass
+
+    class FetchReach:
+        def __init__(self) -> None:
+            self.PPO = {
+                    'learning_rate': [3e-4, 1e-4, 5e-5],
+                    'n_steps': [128, 256, 512],
+                    'batch_size': [64, 128, 256],
+                    'n_epochs': [4, 8, 16],
+                    'gamma': [0.99, 0.95],
+                    'gae_lambda': [0.95, 0.98],
+                    'clip_range': [0.2, 0.1],
+                    'clip_range_vf': [None, 0.2],
+                    'normalize_advantage': [True, False],
+                    'ent_coef': [0.01, 0.001],
+                    'vf_coef': [0.5, 0.75],
+                    'policy_kwargs': [dict(net_arch=[512, 512, 256, 128])]
+                }
+            self.TQC = {
+                    'learning_rate': [5e-3, 1e-4, 5e-5],
+                    'n_steps': [128, 256, 512, 1024],
+                    'batch_size': [128, 256, 512],
+                    'buffer_size': [int(1e4), int(1e5), int(1e6)],
+                    'learning_starts': [1e3, 1e4],
+                    'gamma': [0.99, 0.95, 0.9],
+                    'policy_kwargs': [dict(net_arch=[64, 64]), dict(net_arch=[128, 128])],
+                    'replay_buffer_class': [HerReplayBuffer],
+                    'replay_buffer_kwargs': {'n_sampled_goal': 4, 'goal_selection_strategy': ['future']}
             }
+        
 
 class Tuner:
     
-    def __init__(self, env, log_path) -> None:
-        self.env = env
+    def __init__(self, environment) -> None:
+        self.env = environment.env
+        log_path = environment.log_path
+        env_name = environment.environment_name
         self.log_path = os.path.join(log_path, 'Tuning')
         self.best_mean_reward = -float('inf')
         self.best_params = {}
+        self.__temp_params = {}
         self.best_model = None
-        self.parameters = ParameterDicts()
+        
+        if env_name == 'FetchReach-v2':
+            self.__parameters = ParameterDicts().FetchReach()
 
 
-    def tunePPO(self, max_timesteps=1000000, max_iterations=10, max_time=3600, training_device="cuda", save_model=False):
+    def tune(self, model_type, max_timesteps=1000000, max_iterations=10, max_time=3600, training_device="cuda", save_model=False):
         reward_tracker = RewardTrackerCallback()
         time_callback = TimeLimitCallback(time_limit=max_time)
         
@@ -89,38 +106,83 @@ class Tuner:
             eval_callback = EvalCallback(self.env, eval_freq=5000, callback_after_eval=stop_train_callback, verbose=0)
             callback_list = CallbackList([eval_callback, time_callback, reward_tracker])
 
-            model = PPO('MultiInputPolicy', self.env, device=training_device, verbose=1, tensorboard_log=self.log_path)
-        
-            model.learning_rate = random.choice(self.parameters.PPO['learning_rate'])
-            model.batch_size = random.choice(self.parameters.PPO['batch_size'])
-            model.n_epochs = random.choice(self.parameters.PPO['n_epochs'])
-            model.gamma = random.choice(self.parameters.PPO['gamma'])
-            model.gae_lambda = random.choice(self.parameters.PPO['gae_lambda'])
-            model.normalize_advantage = random.choice(self.parameters.PPO['normalize_advantage'])
-            model.ent_coef = random.choice(self.parameters.PPO['ent_coef'])
-            model.vf_coef = random.choice(self.parameters.PPO['vf_coef'])
-            model.max_grad_norm = random.choice(self.parameters.PPO['max_grad_norm'])
-            model.sde_sample_freq = random.choice(self.parameters.PPO['sde_sample_freq'])
-            model.target_kl = random.choice(self.parameters.PPO['target_kl'])
-            model.policy_kwargs = random.choice(self.parameters.PPO['policy_kwargs'])
+            if model_type == 'PPO':
+                model = PPO('MultiInputPolicy', self.env, device=training_device, verbose=1, tensorboard_log=self.log_path)
+
+                model.learning_rate = random.choice(self.__parameters.PPO['learning_rate'])
+                model.batch_size = random.choice(self.__parameters.PPO['batch_size'])
+                model.n_epochs = random.choice(self.__parameters.PPO['n_epochs'])
+                model.gamma = random.choice(self.__parameters.PPO['gamma'])
+                model.gae_lambda = random.choice(self.__parameters.PPO['gae_lambda'])
+                model.normalize_advantage = random.choice(self.__parameters.PPO['normalize_advantage'])
+                model.ent_coef = random.choice(self.__parameters.PPO['ent_coef'])
+                model.vf_coef = random.choice(self.__parameters.PPO['vf_coef'])
+                model.policy_kwargs = random.choice(self.__parameters.PPO['policy_kwargs'])
 
 
-            model.learn(total_timesteps=max_timesteps, callback=callback_list)
+                model.learn(total_timesteps=max_timesteps, callback=callback_list)
+
+                self.__temp_params = {
+                    'learning_rate': model.learning_rate,
+                    'batch_size': model.batch_size,
+                    'n_epochs': model.n_epochs,
+                    'gamma': model.gamma,
+                    'gae_lambda': model.gae_lambda,
+                    'normalize_advantage': model.normalize_advantage,
+                    'ent_coef': model.ent_coef,
+                    'vf_coef': model.vf_coef,
+                    'max_grad_norm': model.max_grad_norm,
+                    'sde_sample_freq': model.sde_sample_freq,
+                    'target_kl': model.target_kl,
+                    'policy_kwargs': model.policy_kwargs
+                }
+
+                with open(os.path.join(self.log_path, f'PPO_{iteration+1}', 'params.txt'), 'a') as f:
+                    f.write(f'Mean Reward: {reward_tracker.get_mean_reward()}\n')
+                    f.write(f'{time_callback.time_passed}')
+                    f.write(f'{self.__temp_params}\n')
+
+                if save_model:
+                    model.save(os.path.join(self.log_path, f'PPO_{iteration+1}', 'model'))
+
+            if model_type == 'TQC':
+                model = TQC('MultiInputPolicy', self.env, device=training_device, verbose=1,
+                            tensorboard_log=self.log_path)
+
+                model.learning_rate = random.choice(self.__parameters.TQC['learning_rate'])
+                model.batch_size = random.choice(self.__parameters.TQC['batch_size'])
+                model.buffer_size = random.choice(self.__parameters.TQC['buffer_size'])
+                model.learning_starts = random.choice(self.__parameters.TQC['learning_starts'])
+                model.gamma = random.choice(self.__parameters.TQC['gamma'])
+                model.policy_kwargs = random.choice(self.__parameters.TQC['policy_kwargs'])
+
+                model.learn(total_timesteps=max_timesteps, callback=callback_list)
+
+                self.__temp_params = {
+                    'learning_rate': model.learning_rate,
+                    'batch_size': model.batch_size,
+                    'buffer_size': model.buffer_size,
+                    'learning_starts': model.learning_starts,
+                    'gamma': model.gamma,
+                    'policy_kwargs': model.policy_kwargs
+                }
+
+                with open(os.path.join(self.log_path, f'TQC_{iteration + 1}', 'params.txt'), 'a') as f:
+                    f.write(f'Mean Reward: {reward_tracker.get_mean_reward()}\n')
+                    f.write(f'{time_callback.time_passed}')
+                    f.write(f'{self.__temp_params}\n')
+
+                if save_model:
+                    model.save(os.path.join(self.log_path, f'TQC_{iteration + 1}', 'model'))
 
             mean_reward = reward_tracker.get_mean_reward()
             if mean_reward > self.best_mean_reward:
+                self.best_params = self.__temp_params
                 self.best_mean_reward = mean_reward
-                self.best_params = model.get_parameters()
                 self.best_model = model
 
-            with open(os.path.join(self.log_path, f'PPO_{iteration+1}', 'params.txt'), 'a') as f:
-                f.write(f'{model.get_parameters()}') # değişecek
-                f.write(f'{mean_reward}')
-                f.write(f'{time_callback.time_passed}')
-
-            if save_model:
-                model.save(os.path.join(self.log_path, f'PPO_{iteration+1}', 'model'))
+            print(f'Best Parameters For Now: {self.best_params}\n')     
         
-        print(f'Best mean reward: {self.best_mean_reward}')
-        print(f'Best parameters: {self.best_params}')
+        print(f'Best mean reward: {self.best_mean_reward}\n')
+        print(f'Best parameters: {self.best_params}\n')
         
