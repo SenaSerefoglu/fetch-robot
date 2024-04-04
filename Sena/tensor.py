@@ -1,13 +1,15 @@
 import os
+
+log_path = os.path.join('Logs', 'FetchReach-v2')
+training_log_path = os.path.join(log_path, 'PPO1')
+
 from tensorboard import program
 
-class Tensorboard:
-    def __init__(self, log_path):
-        self.log_path = log_path
+tracking_address = training_log_path # the path of your log file.
 
-    def launch(self):
-        tb = program.TensorBoard()
-        tb.configure(argv=[None, '--logdir', self.log_path])
-        url = tb.launch()
-        print(f"Tensorflow listening on {url}")
-        return url
+if __name__ == "__main__":
+    tb = program.TensorBoard()
+    tb.configure(argv=[None, '--logdir', tracking_address])
+    url = tb.launch()
+    print(f"Tensorflow listening on {url}")
+input("Press any key to exit...")
