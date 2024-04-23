@@ -1,7 +1,7 @@
 import os
 
-log_path = os.path.join('Logs', 'FetchReach-v2')
-training_log_path = os.path.join(log_path, 'PPO1')
+log_path = os.path.join('Logs', 'FetchPickAndPlace-v2', 'Tuning')
+training_log_path = os.path.join(log_path, 'TQC_1')
 
 from tensorboard import program
 
