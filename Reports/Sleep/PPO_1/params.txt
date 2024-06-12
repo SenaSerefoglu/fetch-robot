@@ -1,0 +1,6 @@
+Mean Reward: 0
+1733.333065032959{'learning_rate': 0.0003, 'batch_size': 64, 'n_epochs': 10, 'gamma': 0.99, 'gae_lambda': 0.95, 'normalize_advantage': True, 'ent_coef': 0.0, 'vf_coef': 0.5, 'max_grad_norm': 0.5, 'sde_sample_freq': -1, 'target_kl': None, 'policy_kwargs': None}
+Mean Reward: 0
+1726.0753257274628{'learning_rate': 0.0003, 'batch_size': 64, 'n_epochs': 10, 'gamma': 0.99, 'gae_lambda': 0.95, 'normalize_advantage': True, 'ent_coef': 0.0, 'vf_coef': 0.5, 'max_grad_norm': 0.5, 'sde_sample_freq': -1, 'target_kl': None, 'policy_kwargs': None}
+Mean Reward: 0
+1732.7720396518707{'learning_rate': 0.0003, 'batch_size': 64, 'n_epochs': 10, 'gamma': 0.99, 'gae_lambda': 0.95, 'normalize_advantage': True, 'ent_coef': 0.0, 'vf_coef': 0.5, 'max_grad_norm': 0.5, 'sde_sample_freq': -1, 'target_kl': None, 'policy_kwargs': None}

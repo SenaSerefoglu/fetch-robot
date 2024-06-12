@@ -1,0 +1,2 @@
+Mean Reward: 0
+1730.8383831977844{'learning_rate': 0.0003, 'batch_size': 64, 'n_epochs': 10, 'gamma': 0.99, 'gae_lambda': 0.95, 'normalize_advantage': True, 'ent_coef': 0.0, 'vf_coef': 0.5, 'max_grad_norm': 0.5, 'sde_sample_freq': -1, 'target_kl': None, 'policy_kwargs': None}
