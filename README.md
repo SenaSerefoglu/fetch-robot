@@ -6,12 +6,12 @@ Proje Açıklaması
 Bu çalışma kapsamında, OpenAI Gym'in güncel versiyonu olan Gymnasium Farama ve Stable-Baselines3 kütüphanesi kullanılarak FetchReach, FetchPush, FetchPickAndPlace ve FetchSlide ortamlarında robot eğitimi gerçekleştirilmiştir. Eğitim sürecinde PPO, DDPG, SAC, TQC ve TD3 algoritmaları kullanılarak her ortamın kendine özgü hedeflerini tamamlayabilmesi için detaylı analizler yapılmıştır.
 Kullanılan Teknolojiler
 
-    Python 3.8+
-    Gymnasium (Farama)
-    MuJoCo (Robot simülasyonu için)
-    Stable-Baselines3
-    TensorFlow & PyTorch (Takviyeli öğrenme modelleri için)
-    TensorBoard (Eğitim sürecinin görselleştirilmesi için)
+- Python 3.8+
+- Gymnasium (Farama)
+- MuJoCo (Robot simülasyonu için)
+- Stable-Baselines3
+- TensorFlow & PyTorch (Takviyeli öğrenme modelleri için)
+- TensorBoard (Eğitim sürecinin görselleştirilmesi için)
 
 # MuJoCo'yu yüklemek için:
 
@@ -35,16 +35,16 @@ python test.py --model trained_models/sac_fetchpush.zip
 
 # Deneyler ve Sonuçlar
 
-    FetchReach ortamında tüm algoritmalar başarılı olurken, SAC en hızlı öğrenen algoritma olmuştur.
-    FetchPush ve FetchPickAndPlace ortamlarında TQC ve SAC en yüksek başarı oranını elde etmiştir.
-    FetchSlide ortamı, yüksek karmaşıklığından dolayı yalnızca TQC algoritması ile kısmen başarılı sonuçlar vermiştir.
+- FetchReach ortamında tüm algoritmalar başarılı olurken, SAC en hızlı öğrenen algoritma olmuştur.
+- FetchPush ve FetchPickAndPlace ortamlarında TQC ve SAC en yüksek başarı oranını elde etmiştir.
+- FetchSlide ortamı, yüksek karmaşıklığından dolayı yalnızca TQC algoritması ile kısmen başarılı sonuçlar vermiştir.
 
 # Parametre Tuning Çalışmaları
 
 Projede hyperparameter tuning için özel bir program geliştirilmiş ve batch size, learning rate, entropy coefficient gibi parametrelerin performansa etkisi analiz edilmiştir.
 # Geliştirme Süreci
 
-    Model eğitimi ve analizi
-    Performans kıyaslamaları ve grafik oluşturma
-    Hiperparametre optimizasyonu
-    Simülasyon verilerinin analizi
+- Model eğitimi ve analizi
+- Performans kıyaslamaları ve grafik oluşturma
+- Hiperparametre optimizasyonu
+- Simülasyon verilerinin analizi
